@@ -9,6 +9,7 @@
 Steps:
 
     $ git clone https://github.com/pathcl/obslab.git
+    $ cd obslab
     $ pip3 install ansible==2.10.7 --user
     $ pip3 install jmespath==0.10.0 --user
 
