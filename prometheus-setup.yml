@@ -1,0 +1,46 @@
+---
+- hosts: all
+  roles:
+    - ./roles/ansible-grafana
+    - ./roles/ansible-prometheus
+    - ./roles/ansible-alertmanager
+    - ./roles/ansible-node-exporter
+
+  vars:
+    prometheus_targets:
+      node:
+      - targets:
+        - localhost:9100
+        - demo.cloudalchemy.org:9100
+        labels:
+          env: demosite
+
+    alertmanager_version: latest
+    alertmanager_slack_api_url: "http://example.com"
+    alertmanager_receivers:
+      - name: slack
+        slack_configs:
+          - send_resolved: true
+            channel: '#alerts'
+    alertmanager_route:
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 3h
+      receiver: slack
+
+    grafana_security:
+      admin_user: admin
+      admin_password: admin
+ 
+    grafana_datasources:
+      - name: prometheus
+        type: prometheus
+        access: proxy
+        url: 'http://localhost:9090'
+        basicAuth: false
+
+    grafana_dashboards:
+      - dashboard_id: 1860
+        revision_id: 23
+        datasource: prometheus
