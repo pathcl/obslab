@@ -1,0 +1,42 @@
+---
+- name: run roles
+  hosts: all
+  become: true
+  tasks:
+  - name: "Set vars"
+    ansible.builtin.set_fact:
+      ansible_host=test.example.com
+  roles:
+    - fahcsim.grafana_stack.loki_server
+    - fahcsim.grafana_stack.promtail
+    - fahcsim.grafana_stack.prometheus
+    - fahcsim.grafana_stack.prometheus_node_exporter
+    - fahcsim.grafana_stack.grafana
+
+- name: Verify
+  hosts: all
+  tasks:
+
+  - name: Verify Grafana is serving web requests.
+    ansible.builtin.uri:
+      url: "http://{{  ansible_default_ipv4.address  }}:3000"
+      status_code: 200
+
+  - name: Verify Prometheus is serving web requests.
+    ansible.builtin.uri:
+      url: "http://{{  ansible_default_ipv4.address  }}:9090"
+      status_code: 200
+
+  - name: enable and start loki service
+    ansible.builtin.systemd:
+      name: loki
+      enabled: true
+      state: started
+    tags:
+      - loki
+    register: systemd
+
+  - name: check loki service
+    ansible.builtin.command: systemctl status loki.service
+    register: loki_service
+    changed_when: false
