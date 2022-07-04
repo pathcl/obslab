@@ -1,0 +1,20 @@
+---
+- name: bootstrap monitoring server
+  hosts: all
+  become: True
+  vars:
+    loki_server: loki_server.local
+    prometheus_targets:
+      node:
+      - targets:
+        - localhost:9100
+        - demo.cloudalchemy.org:9100
+        labels:
+          env: demosite
+
+  roles:
+    - ./roles/ansible-prometheus
+    - ./fahcsim/roles/loki_server
+    - ./fahcsim/roles/prometheus_node_exporter
+    - ./fahcsim/roles/promtail
+    - ./fahcsim/roles/grafana
